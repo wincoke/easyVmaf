@@ -4,7 +4,7 @@ FROM python:3.8-slim AS base
 
 ARG	FFMPEG_version=master \
 ARG	VMAF_version=master \
-ARG	easyVmaf_hash=31c59a444445125265044789d0754db8f39f71be	
+ARG	easyVmaf_tag=2.1
 
 FROM base as build
 
@@ -37,8 +37,8 @@ RUN \
 	export PATH="${HOME}/.local/bin:${PATH}" && \
 	echo $PATH &&\
 	if [ "$VMAF_version" = "master" ] ; \
-	 then wget https://github.com/Netflix/vmaf/archive/${VMAF_version}.tar.gz && \
-	 tar -xzf  ${VMAF_version}.tar.gz ; \
+	 then wget https://github.com/Netflix/vmaf/archive/v${VMAF_version}.tar.gz && \
+	 tar -xzf  v${VMAF_version}.tar.gz ; \
 	 else wget https://github.com/Netflix/vmaf/archive/v${VMAF_version}.tar.gz && \
 	 tar -xzf  v${VMAF_version}.tar.gz ; \ 
 	fi && \
@@ -67,8 +67,8 @@ RUN \
 # install  easyVmaf
 WORKDIR  /app
 RUN \
-	wget https://github.com/gdavila/easyVmaf/archive/${easyVmaf_hash}.tar.gz && \
-	tar -xzf  ${easyVmaf_hash}.tar.gz
+	wget https://github.com/wincoke/easyVmaf/archive/refs/tags/${easyVmaf_tag}.tar.gz && \
+	tar -xzf  ${easyVmaf_tag}.tar.gz
 
 FROM base AS release
 
@@ -83,7 +83,7 @@ RUN \
 	pip3 install --user ffmpeg-progress-yield
 
 COPY --from=build /usr/local /usr/local/
-COPY --from=build /app/easyVmaf-${easyVmaf_hash} /app/easyVmaf/
+COPY --from=build /app/easyVmaf-${VMAF_version} /app/easyVmaf/
 
 # app setup
 WORKDIR  /app/easyVmaf
