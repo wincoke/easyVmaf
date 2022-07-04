@@ -77,7 +77,8 @@ def get_args():
         '-progress', help='Activate progress indicator for vmaf computation. (Default: false).', action='store_true')
     parser.add_argument(
         '-endsync', help='Activate end sync. This ends the computation when the shortest video ends. (Default: false).', action='store_true')
-
+    parser.add_argument('-scale_type', dest='scale_type', type=str,
+                        default='model', help='Options: ref、dis、model(Default: model)')
     parser.add_argument('-output_fmt', dest='output_fmt', type=str, default='json',
                         help='Output vmaf file format. Options: json or xml (Default: json)')
     
@@ -118,6 +119,7 @@ if __name__ == '__main__':
     print_progress = cmdParser.progress
     end_sync = cmdParser.endsync
     cambi_heatmap = cmdParser.cambi_heatmap
+    scale_type = cmdParser.scale_type
 
     # Setting verbosity
     if verbose:
@@ -151,7 +153,7 @@ if __name__ == '__main__':
 
     for main in mainFiles:
         myVmaf = vmaf(main, reference, loglevel=loglevel, subsample=n_subsample, model=model,
-                      output_fmt=output_fmt, threads=threads, print_progress=print_progress, end_sync=end_sync, manual_fps=fps, cambi_heatmap = cambi_heatmap)
+                      output_fmt=output_fmt, threads=threads, print_progress=print_progress, end_sync=end_sync, manual_fps=fps, cambi_heatmap = cambi_heatmap, scale_type=scale_type)
         '''check if syncWin was set. If true offset is computed automatically, otherwise manual values are used  '''
 
         if syncWin > 0:
@@ -204,6 +206,7 @@ if __name__ == '__main__':
         if model == '4K':
             print("VMAF 4K: ", mean(vmafScore))
         print("VMAF output file path: ", myVmaf.ffmpegQos.vmafpath)
+        print("scale_type: ", scale_type)
         if cambi_heatmap:
             print("CAMBI Heatmap output path: ", myVmaf.ffmpegQos.vmaf_cambi_heatmap_path)
 

@@ -121,13 +121,14 @@ class vmaf():
         - Frame rate conversion (if needed)
     """
 
-    def __init__(self, mainSrc, refSrc, output_fmt, model="HD", phone=False, loglevel="info", subsample=1, threads=0, print_progress=False, end_sync=False,  manual_fps=0, cambi_heatmap=False):
+    def __init__(self, mainSrc, refSrc, output_fmt, model="HD", phone=False, loglevel="info", subsample=1, threads=0, print_progress=False, end_sync=False,  manual_fps=0, cambi_heatmap=False, scale_type="model"):
         self.loglevel = loglevel
         self.main = video(mainSrc, self.loglevel)
         self.ref = video(refSrc, self.loglevel)
         self.model = model
         self.phone = phone
         self.subsample = subsample
+        self.scale_type = scale_type
         self.ffmpegQos = FFmpegQos(
             self.main.videoSrc, self.ref.videoSrc, self.loglevel)
         self.target_resolution = None
@@ -145,12 +146,18 @@ class vmaf():
         """ 
         initialization of resolutions for each vmaf model
         """
-        if self.model == 'HD':
-            self.target_resolution = [1920, 1080]
-        elif self.model == '4K':
-            self.target_resolution = [3840, 2160]
+        if self.scale_type == 'ref':
+            self.target_resolution = [self.ref.streamInfo['width'], self.ref.streamInfo['height']]
+        elif self.scale_type == "dis":
+            self.target_resolution = [self.main.streamInfo['width'], self.main.streamInfo['height']]
         else:
-            exit("[easyVmaf] ERROR: Invalid vmaf model")
+            if self.model == 'HD':
+                self.target_resolution = [1920, 1080]
+            elif self.model == '4K':
+                self.target_resolution = [3840, 2160]
+            else:
+                exit("[easyVmaf] ERROR: Invalid vmaf model")
+
 
     def _autoScale(self):
         """ 
